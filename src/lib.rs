@@ -591,18 +591,16 @@ impl BigDecimal {
             return self.clone();
         }
 
-        let mut number = bigint.to_i128().unwrap();
-        if number < 0 {
+        let mut number = bigint;
+        if number < BigInt::zero() {
             number = -number;
         }
-        for _ in 0..(need_to_round_digits - 1) {
-            number /= 10;
-        }
+        number /= 10_u64.pow(need_to_round_digits as u32 - 1);
         let digit = number % 10;
 
-        if digit <= 4 {
+        if digit <= BigInt::from(4) {
             self.with_scale(round_digits)
-        } else if bigint.is_negative() {
+        } else if self.is_negative() {
             self.with_scale(round_digits) - BigDecimal::new(BigInt::from(1), round_digits)
         } else {
             self.with_scale(round_digits) + BigDecimal::new(BigInt::from(1), round_digits)
